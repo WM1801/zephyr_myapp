@@ -1,0 +1,6 @@
+board:
+  name: bluepill_gd32f3
+  full_name: Bluepill GD32F3
+  vendor: weact
+  socs:
+    - name: stm32f103xb

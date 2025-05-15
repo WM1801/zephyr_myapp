@@ -1,0 +1,6 @@
+board:
+  name: my429zi
+  full_name: my429zi
+  vendor: st
+  socs:
+    - name: stm32f429xx
