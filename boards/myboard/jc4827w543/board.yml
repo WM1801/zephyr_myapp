@@ -1,0 +1,6 @@
+board:
+  name: jc4827w543
+  full_name: JC4827W543
+  vendor: guition
+  socs:
+    - name: esp32s3
