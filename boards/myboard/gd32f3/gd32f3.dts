@@ -5,13 +5,13 @@
  */
 
 /dts-v1/;
-#include <st/f1/stm32f103Xb.dtsi>
+#include <st/f1/stm32f103Xc.dtsi>
 #include <st/f1/stm32f103r(8-b)tx-pinctrl.dtsi>
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 
 / {
 	model = "WeAct GD32F3";
-	compatible = "st,gd32f3";
+	compatible = "st,gd32f3","st,stm32f103", "st,stm32f1", "simple-bus";
 
 	chosen {
 		zephyr,console = &usart2;
@@ -26,6 +26,10 @@
 			gpios = <&gpiob 2 GPIO_ACTIVE_HIGH>;
 			label = "User LD2";
 		};
+		led_my: led_my1 {
+			gpios = <&gpioa 5 GPIO_ACTIVE_HIGH>;
+			label = "User LD1";
+		};
 	};
 
 	gpio_keys {
@@ -39,6 +43,7 @@
 
 	aliases {
 		led0 = &green_led_2;
+		led1 = &led_my;
 		sw0 = &user_button;
 		watchdog0 = &iwdg;
 		die-temp0 = &die_temp;
@@ -49,16 +54,17 @@
 	status = "okay";
 };
 
+
+/* Отключаем HSE и используем HSI */
 &clk_hse {
-	hse-bypass;
-	clock-frequency = <DT_FREQ_M(8)>; /* STLink 8MHz clock */
-	status = "okay";
+    status = "enabled";
 };
 
+/* Настройка PLL от HSI */
 &pll {
-	mul = <9>;
-	clocks = <&clk_hse>;
-	status = "okay";
+    clocks = <&clk_hse>;
+    mul = <9>;    /* HSI = 8MHz, 8*9 = 72MHz */
+    status = "okay";
 };
 
 &rcc {
@@ -83,7 +89,7 @@
 	current-speed = <115200>;
 	status = "okay";
 };
-/*
+
 &usart3 {
 	pinctrl-0 = <&usart3_tx_pb10 &usart3_rx_pb11>;
 	pinctrl-names = "default";
@@ -131,7 +137,7 @@
 		pinctrl-0 = <&tim2_ch2_pwm_in_pa1>;
 		pinctrl-names = "default";
 	};
-};*/
+};
 
 &iwdg {
 	status = "okay";
@@ -142,7 +148,7 @@
 		 <&rcc STM32_SRC_LSI RTC_SEL(2)>;
 	status = "okay";
 };
-/*
+
 &adc1 {
 	pinctrl-0 = <&adc1_in0_pa0>;
 	pinctrl-names = "default";
@@ -155,7 +161,7 @@
 
 &dma1 {
 	status = "okay";
-};*/
+};
 
 &flash0 {
 	partitions {
