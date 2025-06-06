@@ -24,6 +24,14 @@ static const struct gpio_dt_spec button = GPIO_DT_SPEC_GET_OR(SW0_NODE, gpios,
 	{0});
 static struct gpio_callback button_cb_data;
 
+/*
+ * The led0 devicetree alias is optional. If present, we'll use it
+ * to turn on the LED whenever the button is pressed.
+ */
+static struct gpio_dt_spec led = GPIO_DT_SPEC_GET_OR(DT_ALIAS(led0), gpios,
+						     {0});
+
+
 void button_pressed(const struct device *dev, struct gpio_callback *cb,
 	uint32_t pins)
 {
@@ -32,9 +40,9 @@ printk("Button pressed at %" PRIu32 "\n", k_cycle_get_32());
 
 int main(void)
 {
+	int ret; 
 	printf("my_project! %s\n", CONFIG_BOARD_TARGET);
 
-	int ret;
 	if (!gpio_is_ready_dt(&button)) {
 		printk("Error: button device %s is not ready\n",
 		       button.port->name);
@@ -60,12 +68,32 @@ int main(void)
 	gpio_add_callback(button.port, &button_cb_data);
 	printk("Set up button at %s pin %d\n", button.port->name, button.pin);
 
+    // led 
+	if (led.port && !gpio_is_ready_dt(&led)) {
+		printk("Error %d: LED device %s is not ready; ignoring it\n",
+		       ret, led.port->name);
+		led.port = NULL;
+	}
+	if (led.port) {
+		ret = gpio_pin_configure_dt(&led, GPIO_OUTPUT);
+		if (ret != 0) {
+			printk("Error %d: failed to configure LED device %s pin %d\n",
+			       ret, led.port->name, led.pin);
+			led.port = NULL;
+		} else {
+			printk("Set up LED at %s pin %d\n", led.port->name, led.pin);
+		}
+	}
+    gpio_pin_set_dt(&led, 1);
+
 	while ( 1 )
 	{
 		k_msleep(1000);
 		printf("my_project! %s\n", CONFIG_BOARD_TARGET);
 		int val = gpio_pin_get_dt(&button);
 
+        //led
+        gpio_pin_toggle_dt(&led);
 		/*if (val >= 0) {
 			printf("press button\n"); 
 		}*/
